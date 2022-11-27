@@ -1,13 +1,26 @@
 #![no_std]
 #![no_main]
 
-#[path = "./aarch64/boot/boot.rs"]
+#[path = "./boot/boot.rs"]
 mod boot;
 
-#[path = "panic_fn.rs"]
-mod panic_fn;
+#[path = "panichandler.rs"]
+mod panichandler;
 
 pub unsafe fn kernel_start() -> ! {
-    core::arch::asm!("wfe");
-    loop {}
+    core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<12);
+
+    loop {
+        core::ptr::write_volatile(0xFE20_001C as *mut u32, 1<<24);
+
+        for _ in 0..50000 {
+            core::arch::asm!("nop");
+        }
+
+        core::ptr::write_volatile(0xFE20_0028 as *mut u32, 1<<24);
+
+        for _ in 0..50000 {
+            core::arch::asm!("nop");
+        }
+    }
 }

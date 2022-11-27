@@ -7,7 +7,7 @@
 
 _start:
 	mrs 	x0, MPIDR_EL1
-	and 	x0, x0, #0b11
+	and 	x0, x0, #3
 	ldr 	x1, #0
 	cmp 	x0, x1
 	b.ne	.L_park_core
