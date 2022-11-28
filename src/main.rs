@@ -3,9 +3,10 @@
 
 #[path = "./boot/boot.rs"]
 mod boot;
-
 #[path = "panichandler.rs"]
 mod panichandler;
+#[path = "gpio.rs"]
+mod gpio;
 
 pub unsafe fn kernel_start() -> ! {
     core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<3);
