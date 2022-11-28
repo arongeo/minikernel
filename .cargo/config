@@ -1,5 +1,5 @@
 [target.aarch64-unknown-none]
-rustflags = ["-C", "link-args=--script=linker.ld"]
+rustflags = ["-C", "link-arg=--script=linker.ld"]
 
 [build]
 target = "aarch64-unknown-none"

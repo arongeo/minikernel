@@ -8,16 +8,16 @@ mod boot;
 mod panichandler;
 
 pub unsafe fn kernel_start() -> ! {
-    core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<12);
+    core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<3);
 
     loop {
-        core::ptr::write_volatile(0xFE20_001C as *mut u32, 1<<24);
+        core::ptr::write_volatile(0xFE20_001c as *mut u32, 1<<21);
 
         for _ in 0..50000 {
             core::arch::asm!("nop");
         }
 
-        core::ptr::write_volatile(0xFE20_0028 as *mut u32, 1<<24);
+        core::ptr::write_volatile(0xFE20_0028 as *mut u32, 1<<21);
 
         for _ in 0..50000 {
             core::arch::asm!("nop");
