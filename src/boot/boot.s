@@ -1,6 +1,6 @@
 .macro ADR_REL register, symbol
 	adrp \register, \symbol
-	add \register, \symbol, #:lo12:\symbol
+	add \register, \register, #:lo12:\symbol
 .endm
 
 .section .text._start
@@ -8,7 +8,7 @@
 _start:
 	mrs 	x0, MPIDR_EL1
 	and 	x0, x0, #3
-	ldr 	x1, #0
+	ldr 	x1, MASTER_CORE_ID
 	cmp 	x0, x1
 	b.ne	.L_park_core
 
