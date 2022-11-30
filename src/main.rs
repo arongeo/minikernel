@@ -8,20 +8,18 @@ mod panichandler;
 #[path = "gpio.rs"]
 mod gpio;
 
+use gpio::PinFunction;
+use gpio::PinStatus;
+
 pub unsafe fn kernel_start() -> ! {
-    core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<3);
+    let mut gpio_pins = gpio::GPIO::new();
+    
+    gpio_pins.set_function(21, PinFunction::Output);
+    gpio_pins.set_function(24, PinFunction::Output);
 
-    loop {
-        core::ptr::write_volatile(0xFE20_001c as *mut u32, 1<<21);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-
-        core::ptr::write_volatile(0xFE20_0028 as *mut u32, 1<<21);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
+    if gpio_pins.get_function(24) == PinFunction::Input {
+        gpio_pins.set_status(24, PinStatus::On);
     }
+
+    loop {}
 }
