@@ -3,24 +3,19 @@
 
 #[path = "./boot/boot.rs"]
 mod boot;
-
 #[path = "panichandler.rs"]
 mod panichandler;
+#[path = "gpio.rs"]
+mod gpio;
+
+use gpio::PinFunction;
+use gpio::PinStatus;
 
 pub unsafe fn kernel_start() -> ! {
-    core::ptr::write_volatile(0xFE20_0008 as *mut u32, 1<<3);
+    let mut gpio_pins = gpio::GPIO::new();
 
-    loop {
-        core::ptr::write_volatile(0xFE20_001c as *mut u32, 1<<21);
+    gpio_pins.get_pin(24).unwrap().set_function(PinFunction::Output);
+    gpio_pins.get_pin(24).unwrap().set_status(PinStatus::On);
 
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-
-        core::ptr::write_volatile(0xFE20_0028 as *mut u32, 1<<21);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-    }
+    loop {}
 }
