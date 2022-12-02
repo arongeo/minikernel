@@ -23,3 +23,7 @@ enum AuxRegisters {
     AUX_MU_STAT_REG =   BASE_AUX_ADDR + 0x64,
     AUX_MU_BAUD_REG =   BASE_AUX_ADDR + 0x68,
 }
+
+struct UART {
+    
+}
