@@ -7,6 +7,8 @@ mod boot;
 mod panichandler;
 #[path = "gpio.rs"]
 mod gpio;
+#[path = "uart.rs"]
+mod uart;
 
 use gpio::PinFunction;
 use gpio::PinStatus;
