@@ -1,3 +1,5 @@
+//! Definitions of important constant values
+
 #[cfg(any(peri_mode = "low", doc))]
 pub const BASE_PERI_ADDR: u32 = 0xFE00_0000;
 

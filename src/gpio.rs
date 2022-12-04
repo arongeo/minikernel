@@ -1,3 +1,5 @@
+//! GPIO Access Module
+
 #[path = "config.rs"]
 mod config;
 use config::*;
@@ -6,10 +8,19 @@ use config::*;
 mod errorcodes;
 use errorcodes::ErrorCode;
 
+#[path = "mem.rs"]
+mod mem;
+
 #[derive(Copy, Clone, PartialEq)]
 pub enum PinFunction {
     Input,
     Output,
+    Alt0,
+    Alt1,
+    Alt2,
+    Alt3,
+    Alt4,
+    Alt5,
     NoFunc
 }
 
@@ -20,11 +31,18 @@ pub enum PinStatus {
     NoStat
 }
 
+#[derive(Copy, Clone, PartialEq)]
+pub enum PinUsage {
+    GPIOUsage,
+    UARTUsage,
+}
+
 #[derive(Copy, Clone)]
 pub struct Pin {
     id: u8,
     function: PinFunction,
     status: PinStatus,
+    usage: PinUsage,
 }
 
 impl Pin {
@@ -33,6 +51,7 @@ impl Pin {
             id: id_arg,
             function: PinFunction::Input,
             status: PinStatus::Off,
+            usage: PinUsage::GPIOUsage,
         }
     }
 
@@ -71,20 +90,17 @@ impl Pin {
         let pin_bit_num = self.id % 10;
         func_sel_mask = func_sel_mask << pin_bit_num*3;
 
-        let mut func_sel_reg_val: u32 = 0;
-        unsafe {
-            func_sel_reg_val = core::ptr::read_volatile(func_sel_reg_addr as *mut u32);
-        };
+        let mut func_sel_reg_val: u32 = mem::read_mem_addr_val(func_sel_reg_addr);
 
         func_sel_reg_val &= !(func_sel_mask);
 
-        if self.function == PinFunction::Output {
-            func_sel_reg_val |= 1 << pin_bit_num*3;
+        match self.function {
+            PinFunction::Output => func_sel_reg_val |= 0b001 << pin_bit_num*3,
+            PinFunction::Alt0   => func_sel_reg_val |= 0b100 << pin_bit_num*3,
+            _                   => func_sel_reg_val |= 0b001 << pin_bit_num*3,
         }
-
-        unsafe {
-            core::ptr::write_volatile(func_sel_reg_addr as *mut u32, func_sel_reg_val);
-        };   
+        
+        mem::write_mem_addr_val(func_sel_reg_addr, func_sel_reg_val);
     }
 
     fn gpio_set(&mut self) -> Result<(), ErrorCode> {
@@ -100,21 +116,25 @@ impl Pin {
         gpio_reg_addr = gpio_reg_addr + ((self.id as u32) / 32) * 4;
         let mut gpio_mask: u32 = 1 << self.id;
 
-        let mut gpio_reg_val: u32 = 0;
-        unsafe {
-            gpio_reg_val = core::ptr::read_volatile(gpio_reg_addr as *mut u32);
-        }
+        let mut gpio_reg_val: u32 = mem::read_mem_addr_val(gpio_reg_addr);
 
         gpio_reg_val &= !(gpio_mask);
         gpio_reg_val |= 1 << self.id;
 
-        unsafe {
-            core::ptr::write_volatile(gpio_reg_addr as *mut u32, gpio_reg_val);
-        }
+        mem::write_mem_addr_val(gpio_reg_addr, gpio_reg_val);
         Ok(())
+    }
+
+    pub fn get_usage(&mut self) -> PinUsage {
+        self.usage
+    }
+    
+    pub fn set_usage(&mut self, usage: PinUsage) {
+        self.usage = usage;
     }
 }
 
+#[derive(Copy, Clone)]
 pub struct GPIO {
     pins: [Pin; 58],
 }
@@ -132,9 +152,17 @@ impl GPIO {
 
     pub fn get_pin(&mut self, id: usize) -> Result<&mut Pin, ErrorCode> {
         if id < 58 {
-            return Ok(&mut self.pins[id]);
+            if self.pins[id].get_usage() == PinUsage::GPIOUsage {
+                return Ok(&mut self.pins[id]);
+            } else {
+                return Err(ErrorCode::GPIOPinUsedByOtherProcess)
+            }
         } else {
             return Err(ErrorCode::GPIOPinOutOfBounds);
         }
+    }
+
+    pub fn force_pin_usage(&mut self, pin_number: usize, usage: PinUsage) {
+        self.pins[pin_number].set_usage(usage);
     }
 }

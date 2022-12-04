@@ -16,6 +16,8 @@ use gpio::PinStatus;
 pub unsafe fn kernel_start() -> ! {
     let mut gpio_pins = gpio::GPIO::new();
 
+    let mut uart_api = uart::UART::new(&mut gpio_pins, 14, 15);
+
     gpio_pins.get_pin(24).unwrap().set_function(PinFunction::Output);
     gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
 

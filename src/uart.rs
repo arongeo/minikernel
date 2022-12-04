@@ -1,9 +1,8 @@
+//! UART Access Module
+
 #[path = "config.rs"]
 mod config;
 use config::*;
-
-#[path = "gpio.rs"]
-mod gpio;
 
 // AUX Registers that are important for miniUART, this enum might expand and relocate to another
 // file if I end up adding SPI.
@@ -24,6 +23,13 @@ enum AuxRegisters {
     AUX_MU_BAUD_REG =   BASE_AUX_ADDR + 0x68,
 }
 
-struct UART {
-    
+pub struct UART {
+    tx_pin: crate::gpio::Pin,
+}
+
+impl UART {
+    pub fn new(gpio_pins_arg: &mut crate::gpio::GPIO, pin_num_tx: usize, pin_num_rx: usize) {
+        gpio_pins_arg.get_pin(pin_num_tx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
+        gpio_pins_arg.get_pin(pin_num_rx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
+    }
 }
