@@ -25,6 +25,13 @@ pub enum PinFunction {
 }
 
 #[derive(Copy, Clone, PartialEq)]
+pub enum PullState {
+    Off,
+    PullDown,
+    PullUp,
+}
+
+#[derive(Copy, Clone, PartialEq)]
 pub enum PinStatus {
     On,
     Off,

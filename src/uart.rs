@@ -25,11 +25,16 @@ enum AuxRegisters {
 
 pub struct UART {
     tx_pin: crate::gpio::Pin,
+    rx_pin: crate::gpio::Pin,
 }
 
 impl UART {
-    pub fn new(gpio_pins_arg: &mut crate::gpio::GPIO, pin_num_tx: usize, pin_num_rx: usize) {
+    pub fn new(gpio_pins_arg: &mut crate::gpio::GPIO, pin_num_tx: usize, pin_num_rx: usize) -> Self {
         gpio_pins_arg.get_pin(pin_num_tx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
         gpio_pins_arg.get_pin(pin_num_rx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
+        Self {
+            tx_pin: gpio_pins_arg.get_pin(pin_num_tx).unwrap().clone(),
+            rx_pin: gpio_pins_arg.get_pin(pin_num_rx).unwrap().clone(),
+        }
     }
 }
