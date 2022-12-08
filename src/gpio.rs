@@ -4,12 +4,10 @@
 mod config;
 use config::*;
 
-#[path = "errorcodes.rs"]
-mod errorcodes;
-use errorcodes::ErrorCode;
-
 #[path = "mem.rs"]
 mod mem;
+
+use crate::ErrorCode;
 
 #[derive(Copy, Clone, PartialEq)]
 pub enum PinFunction {
@@ -21,7 +19,6 @@ pub enum PinFunction {
     Alt3,
     Alt4,
     Alt5,
-    NoFunc
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -35,7 +32,6 @@ pub enum PullState {
 pub enum PinStatus {
     On,
     Off,
-    NoStat
 }
 
 #[derive(Copy, Clone, PartialEq)]
@@ -44,21 +40,23 @@ pub enum PinUsage {
     UARTUsage,
 }
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, PartialEq)]
 pub struct Pin {
-    id: u8,
-    function: PinFunction,
-    status: PinStatus,
-    usage: PinUsage,
+    id:         u8,
+    function:   PinFunction,
+    status:     PinStatus,
+    usage:      PinUsage,
+    pullstate:  PullState,
 }
 
 impl Pin {
-    fn new(id_arg: u8) -> Self {
+    pub fn new(id_arg: u8) -> Self {
         Self {
-            id: id_arg,
-            function: PinFunction::Input,
-            status: PinStatus::Off,
-            usage: PinUsage::GPIOUsage,
+            id:         id_arg,
+            function:   PinFunction::Input,
+            status:     PinStatus::Off,
+            usage:      PinUsage::GPIOUsage,
+            pullstate:  PullState::Off,
         }
     }
 
@@ -97,7 +95,7 @@ impl Pin {
         let pin_bit_num = self.id % 10;
         func_sel_mask = func_sel_mask << pin_bit_num*3;
 
-        let mut func_sel_reg_val: u32 = mem::read_mem_addr_val(func_sel_reg_addr);
+        let mut func_sel_reg_val: u32 = mem::read_addr_val(func_sel_reg_addr);
 
         func_sel_reg_val &= !(func_sel_mask);
 
@@ -107,7 +105,7 @@ impl Pin {
             _                   => func_sel_reg_val |= 0b001 << pin_bit_num*3,
         }
         
-        mem::write_mem_addr_val(func_sel_reg_addr, func_sel_reg_val);
+        mem::write_addr_val(func_sel_reg_addr, func_sel_reg_val);
     }
 
     fn gpio_set(&mut self) -> Result<(), ErrorCode> {
@@ -123,13 +121,32 @@ impl Pin {
         gpio_reg_addr = gpio_reg_addr + ((self.id as u32) / 32) * 4;
         let mut gpio_mask: u32 = 1 << self.id;
 
-        let mut gpio_reg_val: u32 = mem::read_mem_addr_val(gpio_reg_addr);
+        let mut gpio_reg_val: u32 = mem::read_addr_val(gpio_reg_addr);
 
         gpio_reg_val &= !(gpio_mask);
         gpio_reg_val |= 1 << self.id;
 
-        mem::write_mem_addr_val(gpio_reg_addr, gpio_reg_val);
+        mem::write_addr_val(gpio_reg_addr, gpio_reg_val);
         Ok(())
+    }
+
+    fn pull_set(&mut self) {
+        let gpio_pull_reg_addr = BASE_GPIO_ADDR + 0xE4 + (((self.id as u32) / 16) * 4);
+
+        let mut gpio_pull_reg_val: u32 = mem::read_addr_val(gpio_pull_reg_addr);
+        let mut gpio_pull_mask: u32 = 0b11;
+        let pin_bit_num = (self.id % 16) * 2;
+        gpio_pull_mask = gpio_pull_mask << pin_bit_num;
+
+        gpio_pull_reg_val &= !(gpio_pull_mask);
+
+        match self.pullstate {
+            PullState::PullUp   => gpio_pull_reg_val |= 0b01 << pin_bit_num,
+            PullState::PullDown => gpio_pull_reg_val |= 0b11 << pin_bit_num,
+            PullState::Off      => (),
+        }
+
+        mem::write_addr_val(gpio_pull_reg_addr, gpio_pull_reg_val);
     }
 
     pub fn get_usage(&mut self) -> PinUsage {
@@ -138,6 +155,20 @@ impl Pin {
     
     pub fn set_usage(&mut self, usage: PinUsage) {
         self.usage = usage;
+    }
+
+    pub fn get_pullstate(&mut self) -> PullState {
+        self.pullstate
+    }
+
+    pub fn set_pullstate(&mut self, pullstate: PullState) -> Result<(), ErrorCode> {
+        if (self.function == PinFunction::Input) | (self.function == PinFunction::Output) {
+            return Err(ErrorCode::GPIOPinWrongFunction);
+        } else {
+            self.pullstate = pullstate;
+            self.pull_set();
+            return Ok(());
+        }
     }
 }
 
