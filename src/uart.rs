@@ -2,7 +2,12 @@
 
 #[path = "config.rs"]
 mod config;
+#[path = "mem.rs"]
+mod mem;
+
 use config::*;
+use crate::gpio;
+use crate::ErrorCode;
 
 // AUX Registers that are important for miniUART, this enum might expand and relocate to another
 // file if I end up adding SPI.
@@ -23,18 +28,36 @@ enum AuxRegisters {
     AUX_MU_BAUD_REG =   BASE_AUX_ADDR + 0x68,
 }
 
-pub struct UART {
-    tx_pin: crate::gpio::Pin,
-    rx_pin: crate::gpio::Pin,
+const BAUD_RATE: u32 = 1; 
+
+pub struct MiniUART {
+    tx_pin: gpio::Pin,
+    rx_pin: gpio::Pin,
 }
 
-impl UART {
-    pub fn new(gpio_pins_arg: &mut crate::gpio::GPIO, pin_num_tx: usize, pin_num_rx: usize) -> Self {
-        gpio_pins_arg.get_pin(pin_num_tx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
-        gpio_pins_arg.get_pin(pin_num_rx).unwrap().set_usage(crate::gpio::PinUsage::UARTUsage);
-        Self {
-            tx_pin: gpio_pins_arg.get_pin(pin_num_tx).unwrap().clone(),
-            rx_pin: gpio_pins_arg.get_pin(pin_num_rx).unwrap().clone(),
+impl MiniUART {
+    pub fn new(gpio_pins: &mut crate::gpio::GPIO, tx_pin_num: usize, rx_pin_num: usize) -> Result<Self, ErrorCode> {
+        match gpio_pins.get_pin(tx_pin_num) {
+            Err(error)  => return Err(error),
+            Ok(result)  => result.set_usage(gpio::PinUsage::UARTUsage),
         }
+
+        match gpio_pins.get_pin(rx_pin_num) {
+            Err(error)  => return Err(error),
+            Ok(result)  => result.set_usage(gpio::PinUsage::UARTUsage),
+        }
+
+
+        Ok(Self {
+            tx_pin: gpio::Pin::new(tx_pin_num as u8),
+            rx_pin: gpio::Pin::new(rx_pin_num as u8),
+        })
+    }
+
+    pub fn init(&mut self) {
+        self.tx_pin.set_function(gpio::PinFunction::Alt0);
+        self.rx_pin.set_function(gpio::PinFunction::Alt0);
+
+        mem::write_addr_val(AuxRegisters::AUX_ENABLES as u32, 1);
     }
 }
