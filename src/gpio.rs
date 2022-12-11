@@ -102,6 +102,7 @@ impl Pin {
         match self.function {
             PinFunction::Output => func_sel_reg_val |= 0b001 << pin_bit_num*3,
             PinFunction::Alt0   => func_sel_reg_val |= 0b100 << pin_bit_num*3,
+            PinFunction::Alt5   => func_sel_reg_val |= 0b010 << pin_bit_num*3,
             _                   => func_sel_reg_val |= 0b001 << pin_bit_num*3,
         }
         
