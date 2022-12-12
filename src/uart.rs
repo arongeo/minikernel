@@ -67,8 +67,8 @@ impl MiniUART {
     pub fn init(&mut self) {
         mem::write_addr_val(AuxRegisters::AUX_ENABLES as u32, 1);
         mem::write_addr_val(AuxRegisters::AUX_MU_IER_REG as u32, 0);
-        mem::write_addr_val(AuxRegisters::AUX_MU_CNTL_REG as u32, 1);
-        mem::write_addr_val(AuxRegisters::AUX_MU_LCR_REG as u32, 0b1);
+        mem::write_addr_val(AuxRegisters::AUX_MU_CNTL_REG as u32, 0);
+        mem::write_addr_val(AuxRegisters::AUX_MU_LCR_REG as u32, 0b11);
         mem::write_addr_val(AuxRegisters::AUX_MU_MCR_REG as u32, 0);
         mem::write_addr_val(AuxRegisters::AUX_MU_IER_REG as u32, 0);
         mem::write_addr_val(AuxRegisters::AUX_MU_IIR_REG as u32, insert_bits(mem::read_addr_val(AuxRegisters::AUX_MU_IIR_REG as u32), 1, 2, 0b11));
@@ -95,7 +95,6 @@ impl MiniUART {
         for character in text.chars() {
             if character == '\n' {
                 self.write_char('\r' as u32);
-                continue;
             }
             self.write_char(character as u32);
         }

@@ -21,24 +21,9 @@ pub unsafe fn kernel_start() -> ! {
 
     let mut uart_conn = uart::MiniUART::new(&mut gpio_pins, 14, 15).unwrap();
     uart_conn.init();
+
     uart_conn.write_to_uart("Hello World!\n");
+    uart_conn.write_to_uart("It works, and the RPi 4 datasheets aren't correct.");
 
-    gpio_pins.get_pin(24).unwrap().set_function(PinFunction::Output);
-    gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
-
-    loop {   
-        gpio_pins.get_pin(24).unwrap().set_status(PinStatus::On);
-        gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-
-        gpio_pins.get_pin(24).unwrap().set_status(PinStatus::Off);
-        gpio_pins.get_pin(21).unwrap().set_status(PinStatus::Off);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-    }
+    loop {}
 }
