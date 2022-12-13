@@ -88,6 +88,11 @@ impl Pin {
         Ok(())
     }
 
+    fn update_status(&mut self) {
+        // TODO: Implement checking in memory, for status change
+        unimplemented!();
+    }
+
     fn gpio_func_sel(&mut self) {
         let mut func_sel_reg_addr = BASE_GPIO_ADDR + ((self.id as u32) / 10) * 4;
 
@@ -169,6 +174,17 @@ impl Pin {
             self.pullstate = pullstate;
             self.pull_set();
             return Ok(());
+        }
+    }
+
+    pub fn wait_for_event(&mut self) -> Result<(), ErrorCode> {
+        if self.function == PinFunction::Input {
+            while self.status == PinStatus::Off {
+                self.update_status();
+            }
+            return Ok(());
+        } else {
+            return Err(ErrorCode::GPIOPinWrongFunction);
         }
     }
 }

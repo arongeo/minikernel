@@ -10,5 +10,8 @@ pub fn panic(_info: &PanicInfo) -> ! {
         Err(error)  => { loop {} },
         Ok(uart_if) => uart_if,
     };
+    uart_interface.init();
+    uart_interface.write_to_uart("We're panicking now.\n");
+    uart_interface.write_to_uart("AAAAAAAAAAAAAAAAAAA!\n");
     loop {}
 }
