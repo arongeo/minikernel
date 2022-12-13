@@ -1,6 +1,6 @@
 # minikernel
 
-A small kernel for the Raspberry Pi 4 written in Rust. With full GPIO support.
+A small kernel for the Raspberry Pi 4 written in Rust. Definitely not the best kernel you'll ever see, a lot of the solutions aren't nearly as thought through as I would like them to be, but this is what I could write now, looking forward to improve :)
 
 ## TODO
 - GPIO Input
