@@ -60,7 +60,8 @@ impl Pin {
         }
     }
 
-    pub fn get_status(&self) -> PinStatus {
+    pub fn get_status(&mut self) -> PinStatus {
+        self.update_status();
         self.status
     }
 
@@ -90,7 +91,16 @@ impl Pin {
 
     fn update_status(&mut self) {
         // TODO: Implement checking in memory, for status change
-        unimplemented!();
+        let bit_mask: u32 = 0b1 << self.id;
+        let mut reg_val = mem::read_addr_val(BASE_GPIO_ADDR + 0x1c);
+        reg_val &= !(bit_mask);
+        reg_val = reg_val >> self.id;
+
+        if reg_val == 1 {
+            self.status = PinStatus::On;
+        } else {
+            self.status = PinStatus::Off;
+        }
     }
 
     fn gpio_func_sel(&mut self) {
