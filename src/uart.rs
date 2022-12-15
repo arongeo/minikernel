@@ -6,7 +6,7 @@ mod config;
 mod mem;
 
 use config::*;
-use crate::gpio;
+use crate::drivers::gpio;
 use crate::ErrorCode;
 
 // AUX Registers that are important for miniUART, this enum might expand and relocate to another
@@ -46,7 +46,7 @@ pub struct MiniUART {
 }
 
 impl MiniUART {
-    pub fn new(gpio_pins: &mut crate::gpio::GPIO, tx_pin_num: usize, rx_pin_num: usize) -> Result<Self, ErrorCode> {
+    pub fn new(gpio_pins: &mut gpio::GPIO, tx_pin_num: usize, rx_pin_num: usize) -> Result<Self, ErrorCode> {
         match gpio_pins.get_pin(tx_pin_num) {
             Err(error)  => return Err(error),
             Ok(result)  => result.set_usage(gpio::PinUsage::UARTUsage),

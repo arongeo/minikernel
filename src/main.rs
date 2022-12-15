@@ -7,25 +7,24 @@ mod boot;
 mod panichandler;
 #[path = "errorcodes.rs"]
 mod errorcodes;
-#[path = "gpio.rs"]
-mod gpio;
-#[path = "uart.rs"]
-mod uart;
+#[path = "drivers.rs"]
+mod drivers;
 
 use errorcodes::ErrorCode;
-use gpio::PinFunction;
-use gpio::PinStatus;
+use drivers::gpio::PinFunction;
+use drivers::gpio::PinStatus;
 
 pub unsafe fn kernel_start() -> ! {
-    let mut gpio_pins = gpio::GPIO::new();
-    let mut uart_conn = uart::MiniUART::new(&mut gpio_pins, 14, 15).unwrap();
+    drivers::init();
 
-    uart_conn.init();
+    let mut mini_uart: &mut drivers::MiniUART = drivers::get_mini_uart().unwrap();
+    let mut gpio_pins: &mut drivers::GPIO = drivers::get_gpio_handler().unwrap();
 
-    uart_conn.write_to_uart("Hello World!\n");
-    uart_conn.write_to_uart("It works, and the RPi 4 datasheets aren't correct.\n");
+    gpio_pins.get_pin(21).unwrap().set_function(drivers::gpio::PinFunction::Output);
+    gpio_pins.get_pin(21).unwrap().set_status(drivers::gpio::PinStatus::On);
 
-    panic!("asd");
+    mini_uart.init();
+    mini_uart.write_to_uart("asd from main");
 
     loop {}
 }
