@@ -10,5 +10,6 @@ global_asm!(
 
 #[no_mangle]
 pub unsafe fn _rust_entry() -> ! {
+    crate::drivers::init();
     crate::kernel_start();
 }
