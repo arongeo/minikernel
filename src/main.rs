@@ -7,40 +7,26 @@ mod boot;
 mod panichandler;
 #[path = "errorcodes.rs"]
 mod errorcodes;
-#[path = "gpio.rs"]
-mod gpio;
-#[path = "uart.rs"]
-mod uart;
+#[path = "drivers.rs"]
+mod drivers;
 
 use errorcodes::ErrorCode;
-use gpio::PinFunction;
-use gpio::PinStatus;
+use drivers::gpio::PinFunction;
+use drivers::gpio::PinStatus;
 
-pub unsafe fn kernel_start() -> ! {
-    let mut gpio_pins = gpio::GPIO::new();
-
-    let mut uart_conn = uart::MiniUART::new(&mut gpio_pins, 14, 15).unwrap();
-
-    if gpio_pins.get_pin(14) != Err(ErrorCode::GPIOPinUsedByOtherProcess) {
-        loop {}
+pub fn kernel_start() -> ! {
+    let mut mini_uart: &mut drivers::MiniUART;
+    let mut gpio_pins: &mut drivers::GPIO;
+    unsafe {
+        mini_uart = drivers::get_mini_uart().unwrap();
+        gpio_pins = drivers::get_gpio_handler().unwrap();
     }
 
-    gpio_pins.get_pin(24).unwrap().set_function(PinFunction::Output);
-    gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
+    gpio_pins.get_pin(21).unwrap().set_function(drivers::gpio::PinFunction::Output);
+    gpio_pins.get_pin(21).unwrap().set_status(drivers::gpio::PinStatus::On);
 
-    loop {   
-        gpio_pins.get_pin(24).unwrap().set_status(PinStatus::On);
-        gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
+    mini_uart.init();
+    mini_uart.write_to_uart("asd from main");
 
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-
-        gpio_pins.get_pin(24).unwrap().set_status(PinStatus::Off);
-        gpio_pins.get_pin(21).unwrap().set_status(PinStatus::Off);
-
-        for _ in 0..50000 {
-            core::arch::asm!("nop");
-        }
-    }
+    loop {}
 }

@@ -60,7 +60,8 @@ impl Pin {
         }
     }
 
-    pub fn get_status(&self) -> PinStatus {
+    pub fn get_status(&mut self) -> PinStatus {
+        self.update_status();
         self.status
     }
 
@@ -88,6 +89,20 @@ impl Pin {
         Ok(())
     }
 
+    fn update_status(&mut self) {
+        // TODO: Implement checking in memory, for status change
+        let bit_mask: u32 = 0b1 << self.id;
+        let mut reg_val = mem::read_addr_val(BASE_GPIO_ADDR + 0x1c);
+        reg_val &= !(bit_mask);
+        reg_val = reg_val >> self.id;
+
+        if reg_val == 1 {
+            self.status = PinStatus::On;
+        } else {
+            self.status = PinStatus::Off;
+        }
+    }
+
     fn gpio_func_sel(&mut self) {
         let mut func_sel_reg_addr = BASE_GPIO_ADDR + ((self.id as u32) / 10) * 4;
 
@@ -102,6 +117,7 @@ impl Pin {
         match self.function {
             PinFunction::Output => func_sel_reg_val |= 0b001 << pin_bit_num*3,
             PinFunction::Alt0   => func_sel_reg_val |= 0b100 << pin_bit_num*3,
+            PinFunction::Alt5   => func_sel_reg_val |= 0b010 << pin_bit_num*3,
             _                   => func_sel_reg_val |= 0b001 << pin_bit_num*3,
         }
         
@@ -168,6 +184,17 @@ impl Pin {
             self.pullstate = pullstate;
             self.pull_set();
             return Ok(());
+        }
+    }
+
+    pub fn wait_for_event(&mut self) -> Result<(), ErrorCode> {
+        if self.function == PinFunction::Input {
+            while self.status == PinStatus::Off {
+                self.update_status();
+            }
+            return Ok(());
+        } else {
+            return Err(ErrorCode::GPIOPinWrongFunction);
         }
     }
 }

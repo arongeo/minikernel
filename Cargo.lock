@@ -3,5 +3,5 @@
 version = 3
 
 [[package]]
-name = "kernel4rpi"
+name = "minikernel"
 version = "0.1.0"

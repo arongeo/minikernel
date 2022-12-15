@@ -5,4 +5,5 @@ pub enum ErrorCode {
     GPIOPinOutOfBounds,
     GPIOPinUsedByOtherProcess,
     GPIOPinWrongFunction,
+    DRIVERSMiniUARTInaccessible,
 }
