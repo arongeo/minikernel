@@ -3,10 +3,12 @@
 pub fn _print(text: &str) {
     let mut mini_uart: &mut crate::drivers::MiniUART;
     unsafe {
-        mini_uart = crate::drivers::get_mini_uart().unwrap();
+        mini_uart = match crate::drivers::get_mini_uart() {
+            Ok(m_uart) => m_uart,
+            Err(error) => panic!("PANIC: ERROR: _print failed to get miniUART handler"),
+        };
     };
-    mini_uart.init();
-    mini_uart.write_to_uart(text);
+    mini_uart.write_str(text);
 }
 
 #[macro_export]

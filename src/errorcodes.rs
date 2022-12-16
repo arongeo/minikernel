@@ -6,4 +6,5 @@ pub enum ErrorCode {
     GPIOPinUsedByOtherProcess,
     GPIOPinWrongFunction,
     DRIVERSMiniUARTInaccessible,
+    DRIVERSGPIOHandlerInaccessible,
 }
