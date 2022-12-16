@@ -8,6 +8,6 @@ pub fn panic(panic_info: &PanicInfo) -> ! {
     unsafe {
         mini_uart = drivers::get_mini_uart().unwrap();
     }
-    mini_uart.write_to_uart("asd from panic");
+    mini_uart.write_to_uart(panic_info.payload().downcast_ref::<&str>().unwrap());
     loop {}
 }
