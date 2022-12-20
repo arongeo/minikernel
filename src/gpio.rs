@@ -61,7 +61,6 @@ impl Pin {
     }
 
     pub fn get_status(&mut self) -> PinStatus {
-        self.update_status();
         self.status
     }
 
@@ -69,42 +68,23 @@ impl Pin {
         self.function
     }
 
-    pub fn get_id(&self) -> u8 {
-        self.id
-    }
-
     pub fn set_status(&mut self, status_arg: PinStatus) -> Result<(), ErrorCode> {
         if self.function == PinFunction::Output {
             self.status = status_arg;
             self.gpio_set();
+            return Ok(());
         } else {
-            return Err(ErrorCode::GPIOStatusUnwriteable);
+            return Err(ErrorCode::GPIOPinWrongFunction);
         }
-        Ok(())
     }
 
-    pub fn set_function(&mut self, function_arg: PinFunction) -> Result<(), ErrorCode> {
+    pub fn set_function(&mut self, function_arg: PinFunction) {
         self.function = function_arg;
         self.gpio_func_sel();
-        Ok(())
-    }
-
-    fn update_status(&mut self) {
-        // TODO: Implement checking in memory, for status change
-        let bit_mask: u32 = 0b1 << self.id;
-        let mut reg_val = mem::read_addr_val(BASE_GPIO_ADDR + 0x1c);
-        reg_val &= !(bit_mask);
-        reg_val = reg_val >> self.id;
-
-        if reg_val == 1 {
-            self.status = PinStatus::On;
-        } else {
-            self.status = PinStatus::Off;
-        }
     }
 
     fn gpio_func_sel(&mut self) {
-        let mut func_sel_reg_addr = BASE_GPIO_ADDR + ((self.id as u32) / 10) * 4;
+        let func_sel_reg_addr = BASE_GPIO_ADDR + ((self.id as u32) / 10) * 4;
 
         let mut func_sel_mask: u32 = 0b111; 
         let pin_bit_num = self.id % 10;
@@ -124,18 +104,14 @@ impl Pin {
         mem::write_addr_val(func_sel_reg_addr, func_sel_reg_val);
     }
 
-    fn gpio_set(&mut self) -> Result<(), ErrorCode> {
-        let mut gpio_reg_addr: u32 = 0;
-
-        match self.status {
-            PinStatus::Off  => gpio_reg_addr = BASE_GPIO_ADDR + 0x28,
-            PinStatus::On   => gpio_reg_addr = BASE_GPIO_ADDR + 0x1c,
-            _               => return Err(ErrorCode::GPIOStatusUnwriteable),
+    fn gpio_set(&mut self) {
+        let mut gpio_reg_addr: u32 = match self.status {
+            PinStatus::Off  => BASE_GPIO_ADDR + 0x28,
+            PinStatus::On   => BASE_GPIO_ADDR + 0x1c,
         };
 
-
         gpio_reg_addr = gpio_reg_addr + ((self.id as u32) / 32) * 4;
-        let mut gpio_mask: u32 = 1 << self.id;
+        let gpio_mask: u32 = 1 << self.id;
 
         let mut gpio_reg_val: u32 = mem::read_addr_val(gpio_reg_addr);
 
@@ -143,7 +119,6 @@ impl Pin {
         gpio_reg_val |= 1 << self.id;
 
         mem::write_addr_val(gpio_reg_addr, gpio_reg_val);
-        Ok(())
     }
 
     fn pull_set(&mut self) {
@@ -186,17 +161,6 @@ impl Pin {
             return Ok(());
         }
     }
-
-    pub fn wait_for_event(&mut self) -> Result<(), ErrorCode> {
-        if self.function == PinFunction::Input {
-            while self.status == PinStatus::Off {
-                self.update_status();
-            }
-            return Ok(());
-        } else {
-            return Err(ErrorCode::GPIOPinWrongFunction);
-        }
-    }
 }
 
 #[derive(Copy, Clone)]
@@ -225,9 +189,5 @@ impl GPIO {
         } else {
             return Err(ErrorCode::GPIOPinOutOfBounds);
         }
-    }
-
-    pub fn force_pin_usage(&mut self, pin_number: usize, usage: PinUsage) {
-        self.pins[pin_number].set_usage(usage);
     }
 }

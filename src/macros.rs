@@ -1,7 +1,7 @@
 
 
 pub fn _print(text: &str) {
-    let mut mini_uart: &mut crate::drivers::MiniUART;
+    let mini_uart: &mut crate::drivers::MiniUART;
     unsafe {
         mini_uart = match crate::drivers::get_mini_uart() {
             Ok(m_uart) => m_uart,

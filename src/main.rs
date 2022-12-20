@@ -1,5 +1,6 @@
 #![no_std]
 #![no_main]
+#![allow(dead_code)]
 
 #[path = "./boot/boot.rs"]
 mod boot;
@@ -17,17 +18,15 @@ use drivers::gpio::PinFunction;
 use drivers::gpio::PinStatus;
 
 pub fn kernel_start() -> ! {
-    let mut gpio_pins: &mut drivers::GPIO;
+    let gpio_pins: &mut drivers::GPIO;
     unsafe {
         gpio_pins = drivers::get_gpio_handler().unwrap();
     }
+ 
+    uart_println!("Control write");
 
-    gpio_pins.get_pin(21).unwrap().set_function(drivers::gpio::PinFunction::Output);
-    gpio_pins.get_pin(21).unwrap().set_status(drivers::gpio::PinStatus::On);
-
-    uart_println!("asd");
+    gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
+    gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
 
     panic!("uh oh");
-
-    loop {}
 }

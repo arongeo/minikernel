@@ -11,6 +11,7 @@ use crate::ErrorCode;
 
 // AUX Registers that are important for miniUART, this enum might expand and relocate to another
 // file if I end up adding SPI.
+#[allow(non_camel_case_types)]
 #[repr(u32)]
 enum AuxRegisters {
     AUX_IRQ         =   BASE_AUX_ADDR,
@@ -37,7 +38,7 @@ fn insert_bits(mut val: u32, left_shift_by: u32, bits_length: u32, mut inserted_
 }
 
 fn calc_baudrate_divisor(baud: u32) -> u32 {
-    ((500_000_000/(8*baud))-1)
+    (500_000_000/(8*baud))-1
 }
 
 pub struct MiniUART {
