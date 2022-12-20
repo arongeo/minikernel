@@ -1,7 +1,7 @@
 //
-//! main.rs
-//  copyright 2022 - arongeo
-//  https://arongeo.com
+//! minikernel
+//! copyright 2022 - arongeo
+//! <https://arongeo.com>
 //
 
 #![no_std]
