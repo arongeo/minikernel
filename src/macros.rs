@@ -1,12 +1,13 @@
-
+//  
+//! miniUART print macro module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 pub fn _print(text: &str) {
-    let mini_uart: &mut crate::drivers::MiniUART;
-    unsafe {
-        mini_uart = match crate::drivers::get_mini_uart() {
-            Ok(m_uart) => m_uart,
-            Err(_error) => panic!("PANIC: ERROR: _print failed to get miniUART handler"),
-        };
+    let mini_uart: &mut crate::drivers::MiniUART = match crate::drivers::get_mini_uart() {
+        Ok(m_uart) => m_uart,
+        Err(_error) => panic!("PANIC: ERROR: _print failed to get miniUART handler"),
     };
     mini_uart.write_str(text);
 }

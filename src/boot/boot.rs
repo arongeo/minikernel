@@ -1,3 +1,9 @@
+//
+//! rust boot module - entry into rust 
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
+
 use core::arch::global_asm;
 
 #[no_mangle]

@@ -1,4 +1,8 @@
-//! Memory Operations
+//
+//! memory operations module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 pub fn read_addr_val(addr: u32) -> u32 {
     let mut memory_addr_val: u32 = 0;

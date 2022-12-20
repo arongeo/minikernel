@@ -1,4 +1,8 @@
-//! Definitions of important constant values
+//
+//! configuration module - definitions of important constant values
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 #[cfg(any(peri_mode = "low", doc))]
 pub const BASE_PERI_ADDR: u32 = 0xFE00_0000;
