@@ -24,16 +24,20 @@ pub fn init() -> Result<(), ErrorCode> {
     Ok(())
 }
 
-pub unsafe fn get_mini_uart() -> Result<&'static mut MiniUART, ErrorCode> {
-    match &mut MINI_UART {
-        Some(mini_uart) => return Ok(mini_uart),
-        None => return Err(ErrorCode::DRIVERSMiniUARTInaccessible),
+pub fn get_mini_uart() -> Result<&'static mut MiniUART, ErrorCode> {
+    unsafe {
+        match &mut MINI_UART {
+            Some(mini_uart) => return Ok(mini_uart),
+            None => return Err(ErrorCode::DRIVERSMiniUARTInaccessible),
+        }
     }
 }
 
-pub unsafe fn get_gpio_handler() -> Result<&'static mut GPIO, ErrorCode> {
-    match &mut GPIO_PINS {
-        Some(gpio_pins) => return Ok(gpio_pins),
-        None => return Err(ErrorCode::DRIVERSGPIOHandlerInaccessible),
+pub fn get_gpio_handler() -> Result<&'static mut GPIO, ErrorCode> {
+    unsafe {
+        match &mut GPIO_PINS {
+            Some(gpio_pins) => return Ok(gpio_pins),
+            None => return Err(ErrorCode::DRIVERSGPIOHandlerInaccessible),
+        }
     }
 }

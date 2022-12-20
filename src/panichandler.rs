@@ -4,13 +4,10 @@ use crate::drivers;
 
 #[panic_handler]
 pub fn panic(panic_info: &PanicInfo) -> ! {
-    let mini_uart: &mut crate::drivers::MiniUART;
-    unsafe {
-        mini_uart = match drivers::get_mini_uart() {
-            Ok(m_uart) => m_uart,
-            Err(_error) => loop {},
-        };
-    }
+    let mini_uart: &mut crate::drivers::MiniUART = match drivers::get_mini_uart() {
+        Ok(m_uart) => m_uart,
+        Err(_error) => loop {},
+    };
     let panic_message: &str = match panic_info.payload().downcast_ref::<&str>() {
         Some(message) => message,
         None => "PANIC: Couldn't find panic message.",

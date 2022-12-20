@@ -18,10 +18,7 @@ use drivers::gpio::PinFunction;
 use drivers::gpio::PinStatus;
 
 pub fn kernel_start() -> ! {
-    let gpio_pins: &mut drivers::GPIO;
-    unsafe {
-        gpio_pins = drivers::get_gpio_handler().unwrap();
-    }
+    let gpio_pins: &mut drivers::GPIO = drivers::get_gpio_handler().unwrap();
  
     uart_println!("Control write");
 
