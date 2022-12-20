@@ -1,3 +1,9 @@
+//
+//! GPIO and miniUART driver handler module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
+
 #[path = "uart.rs"]
 pub mod uart;
 #[path = "gpio.rs"]

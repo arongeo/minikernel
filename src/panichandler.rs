@@ -1,3 +1,8 @@
+//
+//! panic handler module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 use core::panic::PanicInfo;
 use crate::drivers;

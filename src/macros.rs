@@ -1,4 +1,8 @@
-
+//  
+//! miniUART print macro module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 pub fn _print(text: &str) {
     let mini_uart: &mut crate::drivers::MiniUART = match crate::drivers::get_mini_uart() {

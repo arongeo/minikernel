@@ -1,4 +1,8 @@
-//! GPIO Access Module
+//
+//! GPIO access module
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
 
 #[path = "config.rs"]
 mod config;

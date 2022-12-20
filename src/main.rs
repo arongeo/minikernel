@@ -1,3 +1,9 @@
+//
+//! main.rs
+//  copyright 2022 - arongeo
+//  https://arongeo.com
+//
+
 #![no_std]
 #![no_main]
 #![allow(dead_code)]
