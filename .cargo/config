@@ -3,3 +3,4 @@
 
 [build]
 target = "aarch64-unknown-none"
+rustflags = ["--cfg", 'peri_mode="low"']

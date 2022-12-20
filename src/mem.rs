@@ -5,7 +5,7 @@ pub fn read_addr_val(addr: u32) -> u32 {
     unsafe {
         memory_addr_val = core::ptr::read_volatile(addr as *mut u32);
     };
-    memory_addr_val
+    return memory_addr_val;
 }
 
 pub fn write_addr_val(addr: u32, val: u32) {

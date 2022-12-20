@@ -16,6 +16,7 @@ pub fn init() -> Result<(), ErrorCode> {
         Ok(m_uart) => m_uart,
         Err(error) => return Err(error),
     };
+    mini_uart.init();
     unsafe {
         GPIO_PINS = Some(gpio_pins);
         MINI_UART = Some(mini_uart);
