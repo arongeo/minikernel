@@ -5,7 +5,7 @@ pub fn _print(text: &str) {
     unsafe {
         mini_uart = match crate::drivers::get_mini_uart() {
             Ok(m_uart) => m_uart,
-            Err(error) => panic!("PANIC: ERROR: _print failed to get miniUART handler"),
+            Err(_error) => panic!("PANIC: ERROR: _print failed to get miniUART handler"),
         };
     };
     mini_uart.write_str(text);

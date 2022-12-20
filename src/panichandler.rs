@@ -8,10 +8,10 @@ pub fn panic(panic_info: &PanicInfo) -> ! {
     unsafe {
         mini_uart = match drivers::get_mini_uart() {
             Ok(m_uart) => m_uart,
-            Err(error) => loop {},
+            Err(_error) => loop {},
         };
     }
-    let mut panic_message: &str = match panic_info.payload().downcast_ref::<&str>() {
+    let panic_message: &str = match panic_info.payload().downcast_ref::<&str>() {
         Some(message) => message,
         None => "PANIC: Couldn't find panic message.",
     };
