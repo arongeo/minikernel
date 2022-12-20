@@ -34,6 +34,6 @@ pub unsafe fn get_mini_uart() -> Result<&'static mut MiniUART, ErrorCode> {
 pub unsafe fn get_gpio_handler() -> Result<&'static mut GPIO, ErrorCode> {
     match &mut GPIO_PINS {
         Some(gpio_pins) => return Ok(gpio_pins),
-        None => return Err(ErrorCode::DRIVERSMiniUARTInaccessible),
+        None => return Err(ErrorCode::DRIVERSGPIOHandlerInaccessible),
     }
 }

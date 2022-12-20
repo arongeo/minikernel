@@ -6,8 +6,15 @@ use crate::drivers;
 pub fn panic(panic_info: &PanicInfo) -> ! {
     let mini_uart: &mut crate::drivers::MiniUART;
     unsafe {
-        mini_uart = drivers::get_mini_uart().unwrap();
+        mini_uart = match drivers::get_mini_uart() {
+            Ok(m_uart) => m_uart,
+            Err(error) => loop {},
+        };
     }
-    mini_uart.write_to_uart(panic_info.payload().downcast_ref::<&str>().unwrap());
+    let mut panic_message: &str = match panic_info.payload().downcast_ref::<&str>() {
+        Some(message) => message,
+        None => "PANIC: Couldn't find panic message.",
+    };
+    mini_uart.write_str(panic_message);
     loop {}
 }

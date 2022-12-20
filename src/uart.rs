@@ -87,17 +87,17 @@ impl MiniUART {
         }
     }
 
-    fn write_char(&mut self, character: u32) {
+    pub fn write_char(&mut self, character: char) {
         while self.is_fifo_writable() == false {}
-        mem::write_addr_val(AuxRegisters::AUX_MU_IO_REG as u32, character);
+        mem::write_addr_val(AuxRegisters::AUX_MU_IO_REG as u32, character as u32);
     }
 
-    pub fn write_to_uart(&mut self, text: &str) {
+    pub fn write_str(&mut self, text: &str) {
         for character in text.chars() {
             if character == '\n' {
-                self.write_char('\r' as u32);
+                self.write_char('\r');
             }
-            self.write_char(character as u32);
+            self.write_char(character);
         }
     }
 }
