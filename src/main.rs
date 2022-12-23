@@ -31,5 +31,11 @@ pub fn kernel_start() -> ! {
     gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
     gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
 
+    let mini_uart = drivers::get_mini_uart().unwrap();
+    
+    if mini_uart.wait_for_string().to_str().unwrap() == "asd" {
+        uart_println!("YEAHHH asd");
+    }
+
     panic!("uh oh");
 }

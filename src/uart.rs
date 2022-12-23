@@ -31,7 +31,12 @@ enum AuxRegisters {
     AUX_MU_CNTL_REG =   BASE_AUX_ADDR + 0x60,
     AUX_MU_STAT_REG =   BASE_AUX_ADDR + 0x64,
     AUX_MU_BAUD_REG =   BASE_AUX_ADDR + 0x68,
+    UART_QUEUE_MAX  =   16 * 1024,
 }
+
+static mut UART_OUTPUT_QUEUE: [u32; AuxRegisters::UART_QUEUE_MAX as usize] = [0; AuxRegisters::UART_QUEUE_MAX as usize];
+static mut UART_OUTPUT_QUEUE_WRITE_COUNT: usize = 0;
+static mut UART_OUTPUT_QUEUE_READ_COUNT: usize = 0;     
 
 fn insert_bits(mut val: u32, left_shift_by: u32, bits_length: u32, mut inserted_bit_val: u32) -> u32 {
     inserted_bit_val = inserted_bit_val << left_shift_by;
@@ -44,6 +49,7 @@ fn insert_bits(mut val: u32, left_shift_by: u32, bits_length: u32, mut inserted_
 fn calc_baudrate_divisor(baud: u32) -> u32 {
     (500_000_000/(8*baud))-1
 }
+
 
 pub struct MiniUART {
     tx_pin: gpio::Pin,
@@ -83,6 +89,14 @@ impl MiniUART {
         mem::write_addr_val(AuxRegisters::AUX_MU_CNTL_REG as u32, 0b11);
     }
 
+    fn is_fifo_readable(&mut self) -> bool {
+        if (mem::read_addr_val(AuxRegisters::AUX_MU_LSR_REG as u32) & 0b1) == 1 {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     fn is_fifo_writable(&mut self) -> bool {
         if (mem::read_addr_val(AuxRegisters::AUX_MU_LSR_REG as u32) & 0b100000) == 32 {
             return true;
@@ -91,9 +105,14 @@ impl MiniUART {
         }
     }
 
-    pub fn write_char(&mut self, character: char) {
+    fn write_char(&mut self, character: char) {
         while self.is_fifo_writable() == false {}
         mem::write_addr_val(AuxRegisters::AUX_MU_IO_REG as u32, character as u32);
+    }
+
+    fn read_char(&mut self) -> char {
+        while self.is_fifo_readable() == false {}
+        (mem::read_addr_val(AuxRegisters::AUX_MU_IO_REG as u32) as u8) as char
     }
 
     pub fn write_str(&mut self, text: &str) {
@@ -103,5 +122,21 @@ impl MiniUART {
             }
             self.write_char(character);
         }
+    }
+
+    fn write_char_back(&mut self, character: char) {
+        self.write_char(character);
+    } 
+
+    pub fn wait_for_string(&mut self) -> UARTString {
+        let mut char_buffer: [u8; 512] = ['\0' as u8; 512];
+        let mut char_buffer_pointer: usize = 0;
+        while (char_buffer[char_buffer_pointer] != '\r' as u8) && (char_buffer_pointer < 512) {
+            let curr_char = self.read_char();
+            char_buffer[char_buffer_pointer] = curr_char as u8;
+            char_buffer_pointer = char_buffer_pointer + 1;
+            self.write_char_back(curr_char)
+        }
+        UARTString::from(char_buffer)
     }
 }
