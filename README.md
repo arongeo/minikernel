@@ -4,8 +4,12 @@ A small kernel for the Raspberry Pi 4 written in Rust. Definitely not the best k
 
 ## TODO
 - GPIO Input
-- miniUART Input
 - miniUART file transfer
+
+## DONE
+- miniUART output
+- miniUART input
+- GPIO output
 
 ## References
 - [BCM2711 Datasheet](https://datasheets.raspberrypi.com/bcm2711/bcm2711-peripherals.pdf)
