@@ -1,7 +1,7 @@
 //
-//! main.rs
-//  copyright 2022 - arongeo
-//  https://arongeo.com
+//! minikernel
+//! copyright 2022 - arongeo
+//! <https://arongeo.com>
 //
 
 #![no_std]
@@ -31,5 +31,8 @@ pub fn kernel_start() -> ! {
     gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
     gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
 
-    panic!("uh oh");
+    let mini_uart = drivers::get_mini_uart().unwrap();
+    
+    uart_println!(mini_uart.wait_for_string().to_str().unwrap());
+    loop {}
 }
