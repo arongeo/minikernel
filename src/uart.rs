@@ -54,6 +54,9 @@ fn calc_baudrate_divisor(baud: u32) -> u32 {
 pub struct MiniUART {
     tx_pin: gpio::Pin,
     rx_pin: gpio::Pin,
+    output_queue: [char; AuxRegisters::UART_QUEUE_MAX as usize],
+    output_queue_read: usize,
+    output_queue_write: usize,
 }
 
 impl MiniUART {
@@ -72,6 +75,9 @@ impl MiniUART {
         Ok(Self {
             tx_pin: gpio::Pin::new(tx_pin_num as u8),
             rx_pin: gpio::Pin::new(rx_pin_num as u8),
+            output_queue: ['\0'; AuxRegisters::UART_QUEUE_MAX as usize],
+            output_queue_read: 0,
+            output_queue_write: 0,
         })
     }
 
@@ -127,6 +133,10 @@ impl MiniUART {
     fn write_char_back(&mut self, character: char) {
         self.write_char(character);
     } 
+
+    fn write_to_queue(&mut self, character: char) {
+        unimplemented!();
+    }
 
     pub fn wait_for_string(&mut self) -> UARTString {
         let mut char_buffer: [u8; 512] = ['\0' as u8; 512];
