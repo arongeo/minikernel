@@ -4,7 +4,10 @@ A small kernel for the Raspberry Pi 4 written in Rust. Definitely not the best k
 
 ## TODO
 - GPIO Input
+- filesystems
+- system calls
 - miniUART file transfer
+- etc.
 
 ## DONE
 - miniUART output
