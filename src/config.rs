@@ -14,13 +14,15 @@ pub const BASE_GPIO_ADDR: u32 = BASE_PERI_ADDR + 0x200000;
 pub const BASE_AUX_ADDR: u32 = BASE_PERI_ADDR + 0x215000;
 
 pub struct UARTString {
-    string: [u8; 512],
+    string: [u8; 1024],
+    chars_written: u32,
 }
 
 impl UARTString {
-    pub fn from(origin: [u8; 512]) -> Self {
+    pub fn from(origin: [u8; 1024], ch_written: u32) -> Self {
         Self {
             string: origin,
+            chars_written: ch_written,
         }
     }
 

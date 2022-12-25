@@ -33,9 +33,6 @@ pub fn kernel_start() -> ! {
 
     let mini_uart = drivers::get_mini_uart().unwrap();
     
-    if mini_uart.wait_for_string().to_str().unwrap() == "asd" {
-        uart_println!("YEAHHH asd");
-    }
-
-    panic!("uh oh");
+    uart_println!(mini_uart.wait_for_string().to_str().unwrap());
+    loop {}
 }

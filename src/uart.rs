@@ -131,22 +131,25 @@ impl MiniUART {
     }
 
     fn write_char_back(&mut self, character: char) {
+        if character == '\r' {
+            self.write_char('\n');
+        }
         self.write_char(character);
     } 
 
-    fn write_to_queue(&mut self, character: char) {
-        unimplemented!();
-    }
 
     pub fn wait_for_string(&mut self) -> UARTString {
-        let mut char_buffer: [u8; 512] = ['\0' as u8; 512];
+        let mut char_buffer: [u8; 1024] = ['\0' as u8; 1024];
         let mut char_buffer_pointer: usize = 0;
-        while (char_buffer[char_buffer_pointer] != '\r' as u8) && (char_buffer_pointer < 512) {
+        let mut chars_written: u32 = 1;
+        loop {
             let curr_char = self.read_char();
+            if curr_char == '\r' { break; }
             char_buffer[char_buffer_pointer] = curr_char as u8;
-            char_buffer_pointer = char_buffer_pointer + 1;
+            char_buffer_pointer = (char_buffer_pointer + 1) & 1023;
+            chars_written = chars_written + 1;
             self.write_char_back(curr_char)
         }
-        UARTString::from(char_buffer)
+        UARTString::from(char_buffer, chars_written)
     }
 }
