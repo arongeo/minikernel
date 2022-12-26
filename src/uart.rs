@@ -139,12 +139,18 @@ impl MiniUART {
 
 
     pub fn wait_for_string(&mut self) -> UARTString {
-        let mut char_buffer: [u8; 1024] = ['\0' as u8; 1024];
+        let mut char_buffer: [u8; 1024] = [' ' as u8; 1024];
         let mut char_buffer_pointer: usize = 0;
         let mut chars_written: u32 = 1;
         loop {
             let curr_char = self.read_char();
             if curr_char == '\r' { break; }
+            if curr_char as u8 == 8 {
+                char_buffer_pointer = (char_buffer_pointer - 1) & 1023;
+                char_buffer[char_buffer_pointer] = ' ' as u8;
+                //self.write_char_back(curr_char);
+                continue;
+            }
             char_buffer[char_buffer_pointer] = curr_char as u8;
             char_buffer_pointer = (char_buffer_pointer + 1) & 1023;
             chars_written = chars_written + 1;

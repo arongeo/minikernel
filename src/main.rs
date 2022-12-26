@@ -24,15 +24,12 @@ use drivers::gpio::PinFunction;
 use drivers::gpio::PinStatus;
 
 pub fn kernel_start() -> ! {
-    let gpio_pins: &mut drivers::GPIO = drivers::get_gpio_handler().unwrap();
- 
-    uart_println!("Control write");
-
-    gpio_pins.get_pin(21).unwrap().set_function(PinFunction::Output);
-    gpio_pins.get_pin(21).unwrap().set_status(PinStatus::On);
-
     let mini_uart = drivers::get_mini_uart().unwrap();
-    
-    uart_println!(mini_uart.wait_for_string().to_str().unwrap());
-    loop {}
+ 
+    loop {
+        uart_print!("\n>>> ");
+        if mini_uart.wait_for_string().to_str().unwrap() == "asd" {
+            uart_println!("YEAHHH asd");
+        }
+    }
 }

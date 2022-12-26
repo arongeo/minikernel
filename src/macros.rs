@@ -21,7 +21,7 @@ macro_rules! uart_print {
 
 #[macro_export]
 macro_rules! uart_println {
-    () => ($crate::uart_print!("\n"));
+    () => ($crate::print!("\n"));
     ($($arg:tt)*) => {{
         $crate::macros::_print($($arg)*);
     }};

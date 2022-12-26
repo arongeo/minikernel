@@ -28,7 +28,7 @@ impl UARTString {
 
     pub fn to_str(&mut self) -> Result<&str, core::str::Utf8Error> {
         match core::str::from_utf8(&self.string) {
-           Ok(val) => Ok(val),
+           Ok(val) => Ok(val.trim_end()),
            Err(error) => Err(error),
         }
     }
